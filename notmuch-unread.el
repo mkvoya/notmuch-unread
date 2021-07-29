@@ -31,6 +31,9 @@
 (defvar notmuch-unread-mode-line-string nil
   "String to display in the mode line.")
 
+(defvar notmuch-unread-emails 0
+  "Number of unread notmuch emails.")
+
 (put 'notmuch-unread-mode-line-string 'risky-local-variable t)
 
 (defvar notmuch-unread-update-timer nil
@@ -88,6 +91,7 @@
          (color (if (= ct 0)
                     notmuch-unread-icon-color-read
                   notmuch-unread-icon-color-unread)))
+    (setq notmuch-unread-emails ct)
     (setq notmuch-unread-mode-line-string
           (propertize (concat notmuch-unread-icon "[" (number-to-string ct) "]")
                       'face `(:foreground ,color)

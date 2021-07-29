@@ -1,6 +1,6 @@
 ;;; notmuch-unread.el --- Display unread mail count in the mode line
 ;;; Package-Requires: ((notmuch "0.18"))
-;;; Version: 0.1
+;;; Version: 0.2
 
 ;; Copyright (C) 2015  Tyler Earnest <tmearnest@gmail.com>
 ;; Copyright (C) 2014  David Thompson <davet@gnu.org>
@@ -25,6 +25,9 @@
 
 ;;; Code:
 
+(require 'notmuch)
+(require 'notmuch-lib)
+
 (defvar notmuch-unread-mode-line-string nil
   "String to display in the mode line.")
 
@@ -43,24 +46,24 @@
   :type 'string
   :group 'notmuch-unread)
 
-(defcustom notmuch-unread-icon " 📧 "
-  "String to show on modeline"
+(defcustom notmuch-unread-icon "💌"
+  "String to show on modeline."
   :type 'string
   :group 'notmuch-unread)
 
-(defcustom notmuch-unread-icon-color-unread "#98d32f"
-  "Color for unread mail"
+(defcustom notmuch-unread-icon-color-unread "#f8333f"
+  "Color for unread mail."
   :type 'color
   :group 'notmuch-unread)
 
-(defcustom notmuch-unread-icon-color-read "grey70"
-  "Color for read mail"
+(defcustom notmuch-unread-icon-color-read "#98d32f"
+  "Color for read mail."
   :type 'color
   :group 'notmuch-unread)
 
 (defun notmuch-unread-count ()
-  "Return the number of messages that match
-`notmuch-unread-search-term`."
+  "Return the number of messages that match `notmuch-unread-search-term`."
+  (interactive)
   (string-to-number
    (replace-regexp-in-string
     "\n" ""
@@ -77,27 +80,27 @@
             (interactive)
             (notmuch)))
       map)
-   "Keymap to enable notmuch-search unread on click")
+   "Keymap to enable notmuch-search unread on click.")
 
 (defun notmuch-unread-update-handler ()
   "Update the mode line."
   (let* ((ct (notmuch-unread-count))
-        (color (if (= ct 0)
-                   notmuch-unread-icon-color-read
-                 notmuch-unread-icon-color-unread)))
+         (color (if (= ct 0)
+                    notmuch-unread-icon-color-read
+                  notmuch-unread-icon-color-unread)))
     (setq notmuch-unread-mode-line-string
-          (propertize notmuch-unread-icon
-                    'face `(:foreground ,color)
-                    'mouse-face `(:foreground ,color :box (:line-width 1 :style released-button :color "grey75") )
-                    'help-echo (format "%d unread. Mouse-1 to show unread. Mouse-3 to open notmuch" ct)
-                    'keymap notmuch-unread-keymap)))
+          (propertize (concat notmuch-unread-icon "[" (number-to-string ct) "]")
+                      'face `(:foreground ,color)
+                      'mouse-face `(:foreground ,color :box (:line-width 1 :style released-button :color "grey75") )
+                      'help-echo (format "%d unread. Mouse-1 to show unread. Mouse-3 to open notmuch" ct)
+                      'keymap notmuch-unread-keymap)))
   (force-mode-line-update))
 
 ;;;###autoload
 (define-minor-mode notmuch-unread-mode
-  "Display unread mail count in the mode line"
+  "Display unread mail count in the mode line."
   :global t
-  :require 'notmuch
+  :require '(notmuch notmuch-lib)
   (and notmuch-unread-update-timer
        (cancel-timer notmuch-unread-update-timer))
   (if notmuch-unread-mode
